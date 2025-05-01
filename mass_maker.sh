@@ -4,16 +4,22 @@
 builder() {
     echo "Rebuilding projects in directories containing 'ex'..."
     find "$1" -type d -name '*ex*' | xargs -I@ make -C @ re 
+    find "$1" -type d -name '*ex*' | xargs -I@ make -C @ clean 
 } 
 
 executor() {
-    echo "Executing all executable files outside the .git directory..."
+    echo -e "Executing all executable files outside the .git directory...\n"
     find "$1" -type f -not -path './.git/*' -exec test -x {} \; -exec {} \;
+}
+
+fcleaner() {
+    echo "Cleaning up builds in directories containing 'ex'..."
+    find "$1" -type d -name '*ex*' | xargs -I@ make -C @ fclean
 }
 
 cleaner() {
     echo "Cleaning up builds in directories containing 'ex'..."
-    find "$1" -type d -name '*ex*' | xargs -I@ make -C @ fclean
+    find "$1" -type d -name '*ex*' | xargs -I@ make -C @ clean
 }
 
 navigate()
@@ -25,7 +31,7 @@ navigate()
 # Set $DIR based on arguments
 if [ -z "$1" ]; then
     DIR=$(pwd)
-elif [[ "$1" == "make" || "$1" == "exec" || "$1" == "clean" ]]; then
+elif [[ "$1" == "make" || "$1" == "exec" || "$1" == "clean" || "$1" == "fclean" ]]; then
     DIR=$(pwd)
 else
     DIR="$1"
@@ -42,6 +48,11 @@ if [ -n "$1" ]; then
         exec) 
             echo "Executing files..." 
             executor "$DIR"
+            exit 0
+            ;;
+        fclean) 
+            echo "Full Cleaning projects..." 
+            fcleaner "$DIR"
             exit 0
             ;;
         clean) 
