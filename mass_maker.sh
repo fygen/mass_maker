@@ -9,7 +9,7 @@ builder() {
 
 executor() {
     echo -e "Executing all executable files outside the .git directory...\n"
-    find "$1" -type f -not -path './.git/*' -exec test -x {} \; -exec {} \;
+    find "$1" -type f -not -path './.git/*' -exec test -x {} \; -exec echo -e "\nExecuting: {}\n" \; -exec {} \;
 }
 
 fcleaner() {
