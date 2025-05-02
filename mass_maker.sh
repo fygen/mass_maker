@@ -27,6 +27,24 @@ leakchecker() {
     find "$1" -type f -not -path '*/.git/*' -exec test -x {} \; -exec echo -e "\nLeak check: {}\n" \; -exec echo "Running valgrind on: {}" \; -exec valgrind --leak-check=full {} \;
 }
 
+installer() {
+    echo "Installing..."
+    # copy this script to ~/.local/bin
+    cp "$0" ~/.local/bin/42maker.sh
+    # make it executable
+    chmod +x ~/.local/bin/42maker.sh
+    # add ~/.local/bin to PATH if not already present
+    if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+        echo "Added ~/.local/bin to PATH in .zshrc"
+    else
+        echo "~/.local/bin is already in PATH in .zshrc"
+    fi
+    # source .zshrc to apply changes
+    source ~/.zshrc
+    echo "Installation complete. You can now use 42maker.sh from anywhere."
+}
+
 navigate()
 {
     echo "Navigate to the target directory"
@@ -36,7 +54,7 @@ navigate()
 # Set $DIR based on arguments
 if [ -z "$1" ]; then
     DIR=$(pwd)
-elif [[ "$1" == "make" || "$1" == "exec" || "$1" == "clean" || "$1" == "fclean" || "$1" == "leak" ]]; then
+elif [[ "$1" == "make" || "$1" == "exec" || "$1" == "clean" || "$1" == "fclean" || "$1" == "leak" || "$1" == "install" ]]; then
     DIR=$(pwd)
 else
     DIR="$1"
@@ -68,6 +86,11 @@ if [ -n "$1" ]; then
         leak)
             echo "Checking for memory leaks..." 
             leakchecker "$DIR"
+            exit 0
+            ;;
+        install)
+            echo "Installing 42maker.sh..." 
+            installer
             exit 0
             ;;
         *) 
