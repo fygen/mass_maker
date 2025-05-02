@@ -9,7 +9,7 @@ builder() {
 
 executor() {
     echo -e "Executing all executable files outside the .git directory...\n"
-    find "$1" -type f -not -path './.git/*' -exec test -x {} \; -exec echo -e "\nExecuting: {}\n" \; -exec {} \;
+    find "$1" -type f -not -path '*/.git/*' -exec test -x {} \; -exec echo -e "\nExecuting: {}\n" \; -exec {} \;
 }
 
 fcleaner() {
@@ -22,6 +22,11 @@ cleaner() {
     find "$1" -type d -name '*ex*' | xargs -I@ make -C @ clean
 }
 
+leakchecker() {
+    echo "Running leak check on all executables..."
+    find "$1" -type f -not -path '*/.git/*' -exec test -x {} \; -exec echo -e "\nLeak check: {}\n" \; -exec echo "Running valgrind on: {}" \; -exec valgrind --leak-check=full {} \;
+}
+
 navigate()
 {
     echo "Navigate to the target directory"
@@ -31,7 +36,7 @@ navigate()
 # Set $DIR based on arguments
 if [ -z "$1" ]; then
     DIR=$(pwd)
-elif [[ "$1" == "make" || "$1" == "exec" || "$1" == "clean" || "$1" == "fclean" ]]; then
+elif [[ "$1" == "make" || "$1" == "exec" || "$1" == "clean" || "$1" == "fclean" || "$1" == "leak" ]]; then
     DIR=$(pwd)
 else
     DIR="$1"
@@ -60,6 +65,11 @@ if [ -n "$1" ]; then
             cleaner "$DIR"
             exit 0
             ;;
+        leak)
+            echo "Checking for memory leaks..." 
+            leakchecker "$DIR"
+            exit 0
+            ;;
         *) 
             # Fallback: Assume $1 is a directory
             navigate "$DIR"
@@ -72,3 +82,4 @@ fi
 
 # Default behavior if no valid command is provided
 echo "Navigated to $DIR. Ready for further commands."
+echo "Usage: $0 [make|exec|clean|fclean|leak] [directory]"
