@@ -29,21 +29,37 @@ leakchecker() {
 
 installer() {
     echo "Installing..."
-    # copy this script to ~/.local/bin
+    
+    # Ensure ~/.local/bin exists
+    if [ ! -d "$HOME/.local/bin" ]; then
+        echo "~/.local/bin does not exist. Creating it..."
+        mkdir -p "$HOME/.local/bin"
+    fi
+
+    # Copy this script to ~/.local/bin
     cp "$0" ~/.local/bin/42maker.sh
-    # make it executable
+    # Make it executable
     chmod +x ~/.local/bin/42maker.sh
-    # add ~/.local/bin to PATH if not already present
+    
+    # Check if ~/.local/bin is already in PATH
     if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc; then
         echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
         echo "Added ~/.local/bin to PATH in .zshrc"
     else
         echo "~/.local/bin is already in PATH in .zshrc"
     fi
-    # source .zshrc to apply changes
-    source ~/.zshrc
+    
+    # Ensure ~/.zshrc exists before sourcing
+    if [ -f "$HOME/.zshrc" ]; then
+        source ~/.zshrc
+        echo "Sourced .zshrc to apply changes."
+    else
+        echo "~/.zshrc not found. Please ensure the file exists to apply changes."
+    fi
+    
     echo "Installation complete. You can now use 42maker.sh from anywhere."
 }
+
 
 navigate()
 {
@@ -105,4 +121,4 @@ fi
 
 # Default behavior if no valid command is provided
 echo "Navigated to $DIR. Ready for further commands."
-echo "Usage: $0 [make|exec|clean|fclean|leak] [directory]"
+echo "Usage: $0 [make|exec|clean|fclean|leak|install] [directory]"
